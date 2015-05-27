@@ -167,17 +167,23 @@ int main(int argc, char *argv[]) {
     r1.fragment.length[0]=0;
     r1.fragment.length[1]=sizeof r1.fragment.client_hello>>8;
     r1.fragment.length[2]=sizeof r1.fragment.client_hello&0xff;
-    r1.fragment.client_hello.version[0]=3;
-    r1.fragment.client_hello.version[1]=0;
+    r1.fragment.client_hello.version[0]=3; //tls v1.2
+    r1.fragment.client_hello.version[1]=3;
     r1.fragment.client_hello.session_id_length[0]=0;
     r1.fragment.client_hello.cipher_suite_length[0]=0;
     r1.fragment.client_hello.cipher_suite_length[1]=sizeof r1.fragment.client_hello.cipher_suite_list;
+
+          //0x00,0x9C - AES128-GCM-SHA256       TLSv1.2 Kx=RSA      Au=RSA  Enc=AESGCM(128) Mac=AEAD                                                                                │···········
+          //0x00,0x3C - AES128-SHA256           TLSv1.2 Kx=RSA      Au=RSA  Enc=AES(128)  Mac=SHA256                                                                                │···········
+          //0x00,0x2F - AES128-SHA              SSLv3 Kx=RSA      Au=RSA  Enc=AES(128)  Mac=SHA1                                                                                    │···········
+          //0x00,0x9D - AES256-GCM-SHA384       TLSv1.2 Kx=RSA      Au=RSA  Enc=AESGCM(256) Mac=AEAD                                                                                │···········
+
     r1.fragment.client_hello.cipher_suite_list[0]=0x00;
-    r1.fragment.client_hello.cipher_suite_list[1]=0x0a; /* SSL_RSA_WITH_3DES_EDE_CBC_SHA */
+    r1.fragment.client_hello.cipher_suite_list[1]=0x9C; /* AES128-GCM-SHA256 */
     r1.fragment.client_hello.cipher_suite_list[2]=0x00;
-    r1.fragment.client_hello.cipher_suite_list[3]=0x04; /* SSL_RSA_WITH_RC4_128_MD5 */
+    r1.fragment.client_hello.cipher_suite_list[3]=0x3C; /* AES128-SHA256 */
     r1.fragment.client_hello.cipher_suite_list[4]=0x00;
-    r1.fragment.client_hello.cipher_suite_list[5]=0x2f; /* TLS_RSA_WITH_AES_128_CBC_SHA */
+    r1.fragment.client_hello.cipher_suite_list[5]=0x9D; /* AES256-GCM-SHA384 */
     r1.fragment.client_hello.compression_length[0]=sizeof r1.fragment.client_hello.compression_list;
     r1.fragment.client_hello.compression_list[0]=0;
 
@@ -206,7 +212,7 @@ int main(int argc, char *argv[]) {
 static void setup_record(record *rec, const byte type, const u_short size) {
     rec->type=type;
     rec->version[0]=3;
-    rec->version[1]=0;
+    rec->version[1]=3;
     rec->length[0]=size>>8;
     rec->length[1]=size&0xff;
 }
@@ -290,7 +296,7 @@ static void statistics(const int err) {
     if(new_time==old_time)
         return;
     old_time=new_time;
-    printf("Succeeded: %-10dFailed: %-10d\r", stats[0], stats[1]);
+    printf("time %lu Succeeded: %-10dFailed: %-10d\n", new_time, stats[0], stats[1]);
     fflush(stdout);
     stats[0]=stats[1]=0;
 }
