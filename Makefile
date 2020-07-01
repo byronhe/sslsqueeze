@@ -1,10 +1,11 @@
 VERSION=1.0
-LIBEVENTDIR=/opt/local
-CPPFLAGS=-I$(LIBEVENTDIR)/include
-CFLAGS=-O2 -Wall
-LDFLAGS=-L$(LIBEVENTDIR)/lib -levent_core
+# sudo apt install pkg-config libevent-dev
+# make
+CFLAGS=-O2 -Wall -g  
+LDFLAGS=$(shell pkg-config --cflags --libs libevent libevent_core libevent_extra libevent_openssl libevent_pthreads)
 
 sslsqueeze: sslsqueeze.o
+	cc $? $(LDFLAGS) -o $@
 
 sslsqueeze.exe: Makefile sslsqueeze.c
 	i586-mingw32msvc-gcc -s -O2 -Wall -o sslsqueeze.exe sslsqueeze.c -levent_core -lws2_32
